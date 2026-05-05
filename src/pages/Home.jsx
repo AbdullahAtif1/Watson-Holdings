@@ -1,7 +1,15 @@
 import { useState } from 'react';
 import { ShieldCheck, MapPin, FileText, PhoneCall, Zap, Box, Navigation, Scale, Maximize, Gauge, ChevronRight, Lock, Download, X, CheckCircle, Star, Clock, Activity, Truck, AlertCircle } from 'lucide-react';
-import redTruckImg from '../assets/imgs/Gemini_Generated_Image_g8cjsog8cjsog8cj.webp';
+// import redTruckImg from '../assets/imgs/Gemini_Generated_Image_g8cjsog8cjsog8cj.webp';
 import driverImg from '../assets/imgs/male.webp';
+// Authentic Asset Imports
+import heroTruck from '../assets/imgs/Gemini_Generated_Image_g8cjsog8cjsog8cj.webp'; // Black truck side profile
+import operatorJules from '../assets/imgs/image8.webp';
+import truckRear from '../assets/imgs/unnamed.jpg'; // Rear view with liftgate
+import truckFront from '../assets/imgs/image4.webp'; // Side view with decals
+import safetyVest from '../assets/imgs/image9.webp'; // PPE closeup
+import strapsBuckets from '../assets/imgs/image6.webp'; // Securement straps
+
 
 const Home = () => {
   const [isUnlocked, setIsUnlocked] = useState(false);
@@ -17,23 +25,83 @@ const Home = () => {
   const HOME_BASE = "441 4TH ST CLUTIER, IA 52217";
 
   const handleDownload = (docName) => {
-    if (!isUnlocked) { setShowModal(true); return; }
-    // Simulation of download
-    const element = document.createElement("a");
-    const file = new Blob([`Secure Doc: ${docName}\nAuthority: ${MC_NUMBER}\nCarrier: Watson Holdings LLC`], {type: 'text/plain'});
-    element.href = URL.createObjectURL(file);
-    element.download = `${docName.replace(/\s+/g, '_')}_COPY.txt`;
-    document.body.appendChild(element);
-    element.click();
-    document.body.removeChild(element);
+    if (!isUnlocked) {
+      setShowModal(true);
+      return;
+    }
+
+    // Mapping to the specific filenames in your /public/docs/ folder
+    const docMap = {
+      'W-9 Form': '/docs/w9.png',
+      'MC Authority': '/docs/mc.jpg', 
+      'Insurance Cert': '/docs/insurance.jpg'
+    };
+
+    const filePath = docMap[docName];
+
+    // Using Blob fetch to ensure local browser support for .jpg downloads
+    fetch(filePath)
+      .then(response => {
+        if (!response.ok) throw new Error('File not found');
+        return response.blob();
+      })
+      .then(blob => {
+        const url = window.URL.createObjectURL(blob);
+        const link = document.createElement('a');
+        link.href = url;
+        link.setAttribute('download', `${docName.replace(/\s+/g, '_')}_th.jpg`);
+        document.body.appendChild(link);
+        link.click();
+        link.parentNode.removeChild(link);
+        window.URL.revokeObjectURL(url);
+      })
+      .catch(() => alert("Error: Ensure files are in public/docs/ with the exact names shown in your folder."));
   };
 
   const handleUnlock = (e) => {
     e.preventDefault();
-    // Simple passcode logic
-    if (accessCode.toUpperCase() === 'WATSON2026') {
-      setIsUnlocked(true); setShowModal(false); setError('');
-    } else { setError('Invalid Code. Try "WATSON2026"'); }
+    if (accessCode.toUpperCase() === 'th2026') {
+      setIsUnlocked(true); 
+      setShowModal(false); 
+      setError('');
+    } else { 
+      setError('Invalid Code. Try "th2026"'); 
+    }
+  };
+
+  const getMailtoLink = () => {
+    if (!quoteOrigin || !quoteDest) return '#';
+
+    const subject = encodeURIComponent(
+      `Quote Request: ${quoteOrigin} to ${quoteDest} - WATSON HOLDINGS LLC`
+    );
+
+    const body = encodeURIComponent(
+      `Hi Andre,\n\nI am reaching out to request a quote for a load moving from ${quoteOrigin} to ${quoteDest}.\n\nEquipment Required: 26ft Box Truck\nCarrier: WATSON HOLDINGS LLC (MC# ${MC_NUMBER})\n\nPlease let me know your availability and rate for this lane.\n\nBest regards,`
+    );
+
+    return `mailto:${EMAIL}?subject=${subject}&body=${body}`;
+  };
+
+
+  const [quoteOrigin, setQuoteOrigin] = useState('');
+  const [quoteDest, setQuoteDest] = useState('');
+
+  const handleQuoteRequest = (e) => {
+    // Note: this must be triggered by a <button type="submit"> within a <form onSubmit={handleQuoteRequest}>
+    if (e && e.preventDefault) e.preventDefault();
+    
+    if (!quoteOrigin || !quoteDest) {
+      alert("Please select both an Origin and a Destination.");
+      return;
+    }
+
+    const subject = encodeURIComponent(`Quote Request: ${quoteOrigin} to ${quoteDest} - WATSON HOLDINGS LLC`);
+    const body = encodeURIComponent(
+      `Hi Andre,\n\nI am reaching out to request a quote for a load moving from ${quoteOrigin} to ${quoteDest}.\n\nEquipment Required: 26ft Box Truck\nCarrier: WATSON HOLDINGS LLC (MC# ${MC_NUMBER})\n\nPlease let me know your availability and rate for this lane.\n\nBest regards,`
+    );
+
+    window.location.href = `mailto:${EMAIL}?subject=${subject}&body=${body}`;
   };
 
   return (
@@ -50,17 +118,16 @@ const Home = () => {
             </div>
             
             <h1 className="text-5xl md:text-7xl font-black leading-none tracking-tight text-gray-900">
-              <span className="text-gradient bg-clip-text text-transparent bg-gradient-to-r from-red-600 to-red-400">WATSON</span> <br />
-              HOLDINGS LLC
+              <span className="text-gradient bg-clip-text text-transparent bg-gradient-to-r from-red-600 to-red-400">WATSON HOLDINGS</span><br /> LLC
             </h1>
             
             <p className="text-xl text-gray-600 max-w-lg leading-relaxed">
-              <strong>Midwest ↔ Southeast Specialist.</strong> <br/>
+              <strong>MIDWEST REGIONAL Specialist.</strong> <br/>
               Owner-Operator run. No dispatch middlemen. Just direct, reliable communication and a 26' Box Truck ready to roll.
             </p>
 
             <div className="flex flex-col sm:flex-row gap-4 pt-4">
-              <a href={`tel:${PHONE.replace(/\D/g,'')}`} className="clip-trap flex items-center justify-center gap-2 bg-red-600 text-white px-8 py-4 font-black text-lg hover-lift shadow-red-500/30 shadow-lg">
+              <a href={`tel:${PHONE.replace(/\D/g,'')}`} className="clip-trap flex uppercase items-center justify-center gap-2 bg-red-600 text-white px-8 py-4 font-black text-lg hover-lift shadow-red-500/30 shadow-lg">
                 <PhoneCall size={20} />
                 CALL CHRIS
               </a>
@@ -74,8 +141,8 @@ const Home = () => {
           <div className="relative w-full h-full animate-fade-in-up" style={{animationDelay: '0.2s'}}>
             <div className="clip-trap relative z-10 bg-gray-800 aspect-[4/5] shadow-2xl group overflow-hidden">
               <img 
-                src={redTruckImg} 
-                alt="2016 F650 Box Truck" 
+                src={heroTruck} 
+                alt="WATSON HOLDINGS LLC 26ft International Box Truck" 
                 className="w-full h-full object-cover opacity-95 group-hover:opacity-100 transition-all duration-700 ease-in-out transform group-hover:scale-110"
               />
               <div className="absolute bottom-0 left-0 w-full bg-gradient-to-t from-black/90 to-transparent p-6 md:p-8">
@@ -90,7 +157,7 @@ const Home = () => {
         </div>
       </section>
 
-      {/* 2. AUTHORITY STRIP */}
+      {/* 2. AUthORITY STRIP */}
       <section id="authority" className="bg-white border-y border-gray-200 py-10 shadow-sm relative z-10">
         <div className="max-w-7xl mx-auto px-4 flex flex-wrap justify-center md:justify-between items-center gap-8 text-center md:text-left">
           <div className="flex flex-col group cursor-default">
@@ -113,7 +180,7 @@ const Home = () => {
         </div>
       </section>
 
-      {/* 3. MEET THE OPERATOR */}
+      {/* 3. MEET thE OPERATOR */}
       <section className="py-24 bg-gray-50 relative overflow-hidden">
         {/* Background decorative element */}
         <div className="absolute top-0 right-0 w-1/3 h-full bg-gray-100 skew-x-12 opacity-50"></div>
@@ -124,21 +191,21 @@ const Home = () => {
               <div className="clip-trap absolute -inset-4 bg-red-600 opacity-20 group-hover:rotate-1 transition-transform duration-500"></div>
               <img 
                 src={driverImg} 
-                alt="Chris Watson" 
+                alt="CHRISTOPHER WATSON - Owner Operator" 
                 className="clip-trap relative shadow-2xl w-full object-cover aspect-[4/5] transition-all duration-500"
               />
               <div className="absolute bottom-6 left-6 bg-black/80 backdrop-blur-md px-6 py-4 border-l-4 border-red-600 shadow-lg">
-                <p className="font-black text-xl uppercase text-white">Chris Watson</p>
+                <p className="font-black text-xl uppercase text-white">CHRISTOPHER WATSON</p>
                 <p className="text-sm text-gray-400 font-bold">Owner & Lead Operator</p>
               </div>
             </div>
 
-           <div className="space-y-6">
+          <div className="space-y-6">
               <h2 className="text-4xl font-black uppercase text-gray-900">
                 Direct Contact. <br /><span className="text-red-600">No Middlemen.</span>
               </h2>
               <p className="text-lg text-gray-600 leading-relaxed border-l-4 border-red-200 pl-4">
-                "I operate under my own authority to kill the anxiety brokers feel when they hang up the phone. When you book Watson Holdings, you aren't talking to a dispatcher—you're talking to the driver. 
+                "I operate under my own authority to kill the anxiety brokers feel when they hang up the phone. When you book WATSON HOLDINGS LLC, you aren't talking to a dispatcher—you're talking to the driver. 
                 <br/><br/>
                 I make the decisions, I drive the truck, and I guarantee your customer's cargo is treated like my own."
               </p>
@@ -159,6 +226,171 @@ const Home = () => {
         </div>
       </section>
 
+      {/* 4. SAFETY & COMPLIANCE BENTO */}
+      <section id="safety" className="py-24 bg-gray-900 text-white overflow-hidden">
+        <div className="max-w-7xl mx-auto px-4">
+          
+          <div className="flex flex-col md:flex-row justify-between items-start md:items-end mb-12 gap-6">
+            <div className="space-y-2">
+              <h2 className="text-4xl md:text-5xl font-black uppercase tracking-tighter">
+                Safety & <span className="text-red-600">Compliance</span>
+              </h2>
+              <p className="text-gray-400 font-bold uppercase tracking-widest text-sm">
+                Zero-Damage Delivery • Full PPE Standards
+              </p>
+            </div>
+            <div className="hidden md:flex gap-4">
+               <div className="flex items-center gap-2 px-4 py-2 bg-gray-800 border-l-2 border-red-600">
+                 <ShieldCheck className="text-red-600" size={20} />
+                 <span className="text-xs font-black uppercase tracking-widest">OSHA Ready</span>
+               </div>
+            </div>
+          </div>
+
+          <div className="grid grid-cols-1 md:grid-cols-4 gap-4 auto-rows-[300px]">
+            
+            {/* BIG BLOCK: PPE Compliance */}
+            <div className="md:col-span-2 md:row-span-2 relative group overflow-hidden clip-trap">
+              <img 
+                src={operatorJules} 
+                alt="CHRISTOPHER WATSON PPE" 
+                className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105" 
+              />
+              <div className="absolute inset-0 bg-gradient-to-t from-black/90 via-black/20 to-transparent p-8 flex flex-col justify-end">
+                <div className="flex items-center gap-2 mb-2">
+                   <span className="h-px w-8 bg-red-600"></span>
+                   <span className="text-red-500 font-black text-xs uppercase tracking-widest">Operator Safety</span>
+                </div>
+                <h3 className="text-3xl font-black uppercase leading-none">Full PPE<br/>Compliance</h3>
+                <p className="text-gray-400 mt-4 text-sm leading-relaxed max-w-sm">
+                  We arrive on-site with high-visibility vests, safety glasses, and hard hats. Prepared for industrial facilities, ports, and high-security job sites.
+                </p>
+              </div>
+            </div>
+
+            {/* MEDIUM BLOCK: Ratchet Straps (Yellow) */}
+            <div className="md:col-span-2 relative group overflow-hidden clip-trap border-b-4 border-red-600">
+              <img 
+                src={strapsBuckets} 
+                alt="Heavy Duty Securement" 
+                className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110" 
+              />
+              <div className="absolute inset-0 bg-gray-900/40 group-hover:bg-transparent transition-colors"></div>
+              <div className="absolute top-6 left-6 bg-red-600 text-white px-4 py-1 text-[10px] font-black uppercase tracking-widest">
+                Load Securement
+              </div>
+              <div className="absolute bottom-6 left-6 right-6">
+                <p className="text-white font-black uppercase text-xl">Grade-A Ratchet Sets</p>
+              </div>
+            </div>
+
+            {/* SMALL BLOCK: Gloves & Vest Detail */}
+            <div className="relative group overflow-hidden clip-trap bg-gray-800">
+              <img 
+                src={safetyVest} 
+                alt="Safety Detail" 
+                className="w-full h-full object-cover opacity-50 group-hover:opacity-100 transition-opacity" 
+              />
+              <div className="absolute inset-0 p-6 flex flex-col justify-between border border-white/5">
+                <Activity className="text-red-600" size={24} />
+                <p className="font-black text-xs uppercase tracking-tighter">Gear Check Every Load</p>
+              </div>
+            </div>
+
+            {/* SMALL BLOCK: Securement Detail */}
+            <div className="relative group overflow-hidden clip-trap bg-red-600 flex flex-col items-center justify-center p-8 text-center shadow-inner">
+               <ShieldCheck size={48} className="mb-4 text-white" />
+               <p className="text-white font-black uppercase text-sm tracking-tighter leading-tight">
+                 Zero Damage<br/>Guarantee
+               </p>
+            </div>
+
+          </div>
+        </div>
+      </section>
+
+      {/* 5. EQUIPMENT & SPECS */}
+      <section id="equipment" className="py-24 bg-gray-50">
+        <div className="max-w-7xl mx-auto px-4">
+          <div className="flex justify-between items-end mb-10 border-b border-gray-200 pb-4">
+            <h2 className="text-4xl font-black uppercase text-gray-900">Technical <span className="text-red-600">Specs</span></h2>
+            <span className="text-xs font-bold text-gray-400 uppercase tracking-wider">Verified Equipment Data</span>
+          </div>
+          
+          <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+            {/* Data Card */}
+            <div className="lg:col-span-2 bg-white p-8 clip-trap border-l-4 border-red-600 shadow-md flex flex-col justify-between">
+              <div>
+                <h3 className="text-3xl font-black text-gray-900 mb-8 uppercase tracking-tighter">26ft International Van</h3>
+                
+                <div className="grid grid-cols-1 sm:grid-cols-3 gap-8">
+                  <div className="space-y-2">
+                    <div className="flex items-center gap-2 text-red-600 font-bold text-xs uppercase"><Maximize size={16}/> Dimensions</div>
+                    <p className="text-2xl font-black text-gray-800 tracking-tighter">26'L x 102"W x 103"H</p>
+                    <p className="text-xs text-gray-400 font-bold uppercase tracking-widest">High-Cube Capacity</p>
+                  </div>
+                  
+                  <div className="space-y-2">
+                    <div className="flex items-center gap-2 text-red-600 font-bold text-xs uppercase"><Scale size={16}/> Payload</div>
+                    <p className="text-2xl font-black text-gray-800 tracking-tighter uppercase">10,000 LBS</p>
+                    <p className="text-xs text-gray-400 font-bold uppercase tracking-widest">Class 6 Non-CDL</p>
+                  </div>
+                  
+                  <div className="space-y-2">
+                    <div className="flex items-center gap-2 text-red-600 font-bold text-xs uppercase"><Gauge size={16}/> Liftgate</div>
+                    <p className="text-2xl font-black tracking-tighter text-red-600 uppercase">3,000 LB</p>
+                    <p className="text-xs text-gray-400 font-bold uppercase tracking-widest">Anthony Rail Liftgate</p>
+                  </div>
+                </div>
+              </div>
+
+              {/* Technical Load Securement Grid (Fills the space) */}
+              <div className="mt-12">
+                <div className="flex items-center gap-2 mb-4">
+                  <CheckCircle className="text-red-600" size={18} />
+                  <span className="text-sm font-black uppercase tracking-widest text-gray-900">Professional Load Securement</span>
+                </div>
+                <div className="grid grid-cols-2 md:grid-cols-4 gap-2">
+                  {[
+                    { icon: <Zap size={18} />, label: 'E-Tracks' },
+                    { icon: <ShieldCheck size={18} />, label: 'Ratchet Straps' },
+                    { icon: <Box size={18} />, label: 'Moving Blankets' },
+                    { icon: <Truck size={18} />, label: 'Pallet Jack' }
+                  ].map((item, idx) => (
+                    <div key={idx} className="bg-gray-900 text-white p-4 clip-trap flex flex-col items-center justify-center text-center group hover:bg-red-600 transition-all duration-300">
+                      <div className="text-red-500 group-hover:text-white mb-2 transition-colors">
+                        {item.icon}
+                      </div>
+                      <span className="text-[10px] font-black uppercase tracking-widest">{item.label}</span>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            </div>
+
+            {/* Equipment Proof Card (the Real Picture) */}
+            <div className="relative group clip-trap bg-gray-200 shadow-xl overflow-hidden h-[400px] lg:h-auto">
+              <img 
+                src={truckRear} 
+                alt="Andre's 3000lb Anthony Liftgate Proof" 
+                className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110"
+              />
+              <div className="absolute inset-0 bg-gradient-to-t from-black/90 via-transparent to-transparent p-8 flex flex-col justify-end">
+                <span className="bg-red-600 text-white text-[10px] font-black px-3 py-1 w-fit mb-3 uppercase tracking-widest animate-pulse">
+                  Verified Unit
+                </span>
+                <p className="text-white font-black uppercase text-2xl leading-none">
+                  3,000 LB Capacity
+                </p>
+                <p className="text-red-500 font-bold text-xs uppercase mt-2 tracking-widest">
+                  Proof of Equipment
+                </p>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
       {/* 4. BROKER REVIEWS (Placeholder updated for Box Truck context) */}
       <section className="py-20 bg-gray-900 text-white clip-angle">
         <div className="max-w-7xl mx-auto px-4">
@@ -169,7 +401,7 @@ const Home = () => {
 
            <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
               {[
-                { name: "Jason M.", company: "TQL", text: "Chris was excellent. Perfect for that tricky LTL run we had. Tracking was on point." },
+                { name: "Jason M.", company: "TQL", text: "Andre was excellent. Perfect for that tricky LTL run we had. Tracking was on point." },
                 { name: "Sarah K.", company: "CH Robinson", text: "No nonsense. He said he'd be there at 8am, he was there at 7:45am. Clean box truck." },
                 { name: "David L.", company: "Coyote", text: "Direct communication makes all the difference. Paperwork was in my inbox immediately." }
               ].map((review, i) => (
@@ -192,64 +424,13 @@ const Home = () => {
            </div>
         </div>
       </section>
-
-      {/* 5. EQUIPMENT & SPECS */}
-      <section id="equipment" className="py-24 bg-gray-50">
-        <div className="max-w-7xl mx-auto px-4">
-          <div className="flex justify-between items-end mb-10 border-b border-gray-200 pb-4">
-            <h2 className="text-4xl font-black uppercase text-gray-900">The <span className="text-red-600">Specs</span></h2>
-            <span className="text-xs font-bold text-gray-400 uppercase tracking-wider">Load Capability Details</span>
-          </div>
-          
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-             {/* Primary Truck - F650 with Micro-Data */}
-             <div className="md:col-span-2 bg-white p-8 clip-trap border-l-4 border-red-600 shadow-md relative overflow-hidden group min-h-[16rem]">
-                <div className="z-10 relative">
-                   <h3 className="text-3xl font-black text-gray-900 mb-6 uppercase tracking-tighter">2016 Ford F650</h3>
-                   
-                   {/* LOAD PREFERENCE MICRO-DATA */}
-                   <div className="grid grid-cols-1 sm:grid-cols-3 gap-6">
-                      <div className="space-y-1">
-                        <div className="flex items-center gap-2 text-red-600 font-bold text-xs uppercase"><Maximize size={14}/> Dimensions</div>
-                        <p className="text-xl font-black text-gray-800 tracking-tighter">26' L x 96" W</p>
-                        <p className="text-xs text-gray-400">Standard Dock Height</p>
-                      </div>
-                      <div className="space-y-1">
-                        <div className="flex items-center gap-2 text-red-600 font-bold text-xs uppercase"><Scale size={14}/> Payload</div>
-                        <p className="text-xl font-black text-gray-800 tracking-tighter">~8,500 LBS</p>
-                        <p className="text-xs text-gray-400">Class 6 Non-CDL</p>
-                      </div>
-                      <div className="space-y-1">
-                        <div className="flex items-center gap-2 text-red-600 font-bold text-xs uppercase"><Gauge size={14}/> Features</div>
-                        <p className="text-xl font-black text-gray-800 tracking-tighter">E-TRACKS</p>
-                        <p className="text-xs text-gray-400">Logistic Posts Ready</p>
-                      </div>
-                   </div>
-                </div>
-                {/* Background Decoration */}
-                <Truck className="absolute -right-8 -bottom-8 text-gray-50 transform -rotate-12 group-hover:text-red-50 transition-colors duration-500" size={240} />
-             </div>
-
-             {/* Broker Ready Box */}
-             <div className="bg-[#111827] text-white p-8 clip-trap border-t-4 border-red-600 shadow-xl flex flex-col justify-center items-center text-center">
-                <div className="inline-block p-3 bg-red-600 rounded-full mb-4 shadow-lg shadow-red-600/20">
-                  <CheckCircle size={24} className="text-white"/>
-                </div>
-                <h4 className="font-black text-xl uppercase tracking-widest mb-2">Broker Ready</h4>
-                <p className="text-gray-400 text-sm leading-relaxed">
-                  Strictly maintained, smoke-free, and organized. Every load is secured with professional-grade straps and bars.
-                </p>
-             </div>
-          </div>
-        </div>
-      </section>
-
+      
       {/* 6. LANES */}
       <section id="lanes" className="py-20 bg-white border-t border-gray-200">
         <div className="max-w-7xl mx-auto px-4 text-center">
             <h2 className="text-3xl font-black uppercase mb-8 text-gray-900">Service <span className="text-red-600">Area</span></h2>
             <p className="text-gray-500 mb-12 max-w-2xl mx-auto">
-                Specializing in Midwest to Southeast lanes. Open to structured backhauls or dedicated regional runs.
+                Specializing in MIDWEST REGIONAL lanes. Open to structured backhauls or dedicated regional runs.
             </p>
 
             <div className="flex flex-wrap justify-center gap-4">
@@ -276,48 +457,63 @@ const Home = () => {
         </div>
       </section>
 
-      {/* 6.5 CHECK AVAILABILITY SECTION */}
+      {/* 6.5 CHECK AVAILABILITY SECTION - FIXED BUTTON TYPE */}
       <section id="availability" className="pb-20 bg-white">
         <div className="max-w-7xl mx-auto px-4">
-            <div className="bg-[#111827] clip-trap p-8 md:p-12 relative overflow-hidden shadow-2xl">
-              {/* Futuristic Background Glow */}
-              <div className="absolute top-0 right-0 w-64 h-64 bg-red-600/10 blur-3xl rounded-full -mr-20 -mt-20"></div>
-              
-              <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center relative z-10">
-                <div className="text-left space-y-4">
-                   <h2 className="text-3xl md:text-5xl font-black text-white leading-none uppercase">
-                    Check <span className="text-red-600">Availability</span>
-                   </h2>
-                   <p className="text-gray-400 text-lg">
-                    Specializing in Midwest ↔ Southeast routes. Get a direct response from the owner-operator within minutes.
-                   </p>
-                </div>
+          <div className="bg-[#111827] clip-trap p-8 md:p-12 relative overflow-hidden shadow-2xl">
+            <div className="absolute top-0 right-0 w-64 h-64 bg-red-600/10 blur-3xl rounded-full -mr-20 -mt-20"></div>
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center relative z-10">
+              <div className="text-left space-y-4 text-white">
+                <h2 className="text-3xl md:text-5xl font-black leading-none uppercase">Check <span className="text-red-600">Availability</span></h2>
+                <p className="text-gray-400 text-lg leading-relaxed">Specializing in <strong>MIDWEST REGIONAL</strong> lanes. Get a direct response from the owner-operator within minutes.</p>
+              </div>
+              <div className="bg-white p-1 clip-trap">
+                <form className="grid grid-cols-1 sm:grid-cols-2 gap-2 p-2 bg-white">
+                  <select
+                    required
+                    value={quoteOrigin}
+                    onChange={(e) => setQuoteOrigin(e.target.value)}
+                    className="bg-gray-100 p-4 font-bold text-gray-700 outline-none focus:bg-gray-200 transition-colors cursor-pointer"
+                  >
+                    <option value="">Origin (Midwest)</option>
+                    <option>IA - Iowa (HQ)</option>
+                    <option>IL - Illinois</option>
+                    <option>MN - Minnesota</option>
+                    <option>WI - Wisconsin</option>
+                  </select>
 
-                <div className="bg-white p-1 clip-trap">
-                   <form className="grid grid-cols-1 sm:grid-cols-2 gap-2 p-2 bg-white">
-                      <select className="bg-gray-100 p-4 font-bold text-gray-700 outline-none focus:bg-gray-200 transition-colors cursor-pointer">
-                        <option value="">Origin (Midwest)</option>
-                        <option>IA - Iowa (HQ)</option>
-                        <option>IL - Illinois</option>
-                        <option>MO - Missouri</option>
-                      </select>
-                      <select className="bg-gray-100 p-4 font-bold text-gray-700 outline-none focus:bg-gray-200 transition-colors cursor-pointer">
-                        <option value="">Destination</option>
-                        <option>GA - Georgia</option>
-                        <option>FL - Florida</option>
-                        <option>AL - Alabama</option>
-                        <option>TN - Tennessee</option>
-                      </select>
-                      <button 
-                        type="button"
-                        className="sm:col-span-2 bg-red-600 text-white font-black py-4 flex items-center justify-center gap-2 hover:bg-red-700 transition-all uppercase tracking-widest group"
-                      >
-                        Request Quote <ChevronRight className="group-hover:translate-x-1 transition-transform" />
-                      </button>
-                   </form>
-                </div>
+                  <select
+                    required
+                    value={quoteDest}
+                    onChange={(e) => setQuoteDest(e.target.value)}
+                    className="bg-gray-100 p-4 font-bold text-gray-700 outline-none focus:bg-gray-200 transition-colors cursor-pointer"
+                  >
+                    <option value="">Destination (Midwest / Plains)</option>
+                    <option>MO - Missouri</option>
+                    <option>NE - Nebraska</option>
+                    <option>KS - Kansas</option>
+                    <option>SD - South Dakota</option>
+                  </select>
+
+
+                  {/* CHANGED TYPE TO SUBMIT */}
+                  <a
+                    href={getMailtoLink()}
+                    onClick={(e) => {
+                      if (!quoteOrigin || !quoteDest) {
+                        e.preventDefault();
+                        alert("Please select both an Origin and a Destination.");
+                      }
+                    }}
+                    className="sm:col-span-2 bg-red-600 text-white font-black py-4 flex items-center justify-center gap-2 hover:bg-red-700 transition-all uppercase tracking-widest group"
+                  >
+                    Request Quote <ChevronRight className="group-hover:translate-x-1 transition-transform" />
+                  </a>
+
+                </form>
               </div>
             </div>
+          </div>
         </div>
       </section>
 
@@ -333,23 +529,31 @@ const Home = () => {
             
             <div className={`bg-gray-800 p-10 clip-trap border-2 ${isUnlocked ? 'border-red-500 shadow-2xl shadow-red-500/20' : 'border-gray-700'} transition-all duration-500`}>
                 <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-                    {['W-9 Form', 'MC Authority', 'Insurance Cert'].map((doc, i) => (
+                    {[
+                      { label: 'W-9 Form', icon: <FileText size={32} /> },
+                      { label: 'MC Authority', icon: <ShieldCheck size={32} /> },
+                      { label: 'Insurance Cert', icon: <Box size={32} /> }
+                    ].map((doc, i) => (
                         <button 
                           key={i} 
-                          onClick={() => handleDownload(doc)}
+                          onClick={() => handleDownload(doc.label)}
                           className={`flex flex-col items-center justify-center p-6 clip-trap border transition-all duration-300
                             ${isUnlocked 
-                              ? 'bg-gray-700 border-gray-600 hover:bg-red-600 hover:text-white hover:-translate-y-1 hover:border-red-600' 
+                              ? 'bg-gray-700 border-gray-600 hover:bg-red-600 hover:text-white hover:-translate-y-1 hover:border-red-600 shadow-lg' 
                               : 'bg-gray-900/50 border-dashed border-gray-600 opacity-50 cursor-not-allowed'
                             }`}
                         >
-                            {isUnlocked ? <Download size={32} className="mb-3"/> : <Lock size={32} className="mb-3"/>}
-                            <span className="font-bold text-sm">{doc}</span>
+                            {isUnlocked ? doc.icon : <Lock size={32}/>}
+                            <span className="font-bold text-sm mt-3 uppercase tracking-tighter">{doc.label}</span>
+                            {isUnlocked && <Download size={14} className="mt-2 opacity-50" />}
                         </button>
                     ))}
                 </div>
                 {!isUnlocked && (
-                  <button onClick={() => setShowModal(true)} className="mt-8 clip-trap bg-white text-gray-900 px-10 py-3 font-bold hover:bg-gray-200 transition-colors">
+                  <button 
+                    onClick={() => setShowModal(true)} 
+                    className="mt-8 clip-trap bg-white text-gray-900 px-10 py-3 font-black uppercase tracking-widest hover:bg-red-600 hover:text-white transition-all shadow-xl"
+                  >
                     ENTER ACCESS CODE
                   </button>
                 )}
